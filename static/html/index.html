@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>系统信息</title>
+</head>
+<body>
+{{/*    主机名：     {{.hostname}}*/}}
+{{/*    </br>*/}}
+{{/*    正常运行时间: {{.uptime}}*/}}
+{{/*    </br>*/}}
+{{/*    启动时间: {{.bootTime}}*/}}
+{{/*    </br>*/}}
+{{/*    进程数: {{.procs}}*/}}
+{{/*    </br>*/}}
+{{/*    系统: {{.os}}*/}}
+{{/*    </br>*/}}
+{{/*    系统: {{.platform}}*/}}
+{{/*    </br>*/}}
+{{/*    系统版本: {{.platformFamily}}*/}}
+{{/*    </br>*/}}
+{{/*    平台: {{.platformVersion}}*/}}
+{{/*    </br>*/}}
+{{/*    内核: {{.kernelVersion}}*/}}
+{{/*    </br>*/}}
+{{/*    内核: {{.kernelArch}}*/}}
+{{/*    </br>*/}}
+{{/*    虚拟化: {{.virtualizationSystem}}*/}}
+{{/*    </br>*/}}
+{{/*    虚拟化角色 : {{.virtualizationRole}}*/}}
+{{/*    </br>*/}}
+{{/*    hostID: {{.hostID}}*/}}
+{{/*    </br>*/}}
+
+<div>
+
+    <table border="1">
+        <thead>
+        <tr>
+            <th>name</th>
+            <th>bytesSent</th>
+            <th>bytesRecv</th>
+            <th>packetsSent</th>
+            <th>packetsRecv</th>
+            <th>errin</th>
+            <th>errout</th>
+            <th>dropin</th>
+            <th>dropout</th>
+            <th>fifoin</th>
+            <th>fifoout</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{range $v,$k := .res}}
+            <td>
+                {{$k.Name}}
+            </td>
+            <td>
+                {{$k.BytesSent}}
+            </td>
+            <td>
+                {{$k.BytesRecv}}
+            </td>
+            <td>
+                {{$k.PacketsSent}}
+            </td>
+            <td>
+                {{$k.PacketsRecv}}
+            </td>
+            <td>
+                {{$k.Errin}}
+            </td>
+            <td>
+                {{$k.Errout}}
+            </td>
+            <td>
+                {{$k.Dropin}}
+            </td>
+            <td>
+                {{$k.Dropout}}
+            </td>
+            <td>
+                {{$k.Fifoin}}
+            </td>
+            <td>
+                {{$k.Fifoout}}
+            </td>
+        {{end}}
+        </tbody>
+    </table>
+</div>
+<div>
+    <table border="1">
+        <thead>
+        <tr>
+            <th>fd</th>
+            <th>family</th>
+            <th>type</th>
+
+            <th>localaddr_ip</th>
+            <th>localaddr_port</th>
+
+            <th>remoteaddr_ip</th>
+            <th>remoteaddr_port</th>
+            <th>status</th>
+            <th>uids</th>
+            <th>pid</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{range $v,$k := .nres}}
+            <tr>
+            <td>
+                {{$k.Fd}}
+            </td>
+            <td>
+                {{$k.Family}}
+            </td>
+            <td>
+                {{$k.Type}}
+            </td>
+            <td>
+                {{$k.Laddr.IP}}
+            </td>
+            <td>
+                {{$k.Laddr.Port}}
+            </td>
+            <td>
+                {{$k.Raddr.IP}}
+            </td>
+            <td>
+                {{$k.Raddr.Port}}
+            </td>
+            <td>
+                {{$k.Status}}
+            </td>
+            <td>
+                {{$k.Uids}}
+            </td>
+            <td>
+                <a href="ProcessInfo.html?id={{$k.Pid}}">{{$k.Pid}}</a>
+            </td>
+            </tr>
+        {{end}}
+        </tbody>
+    </table>
+</div>
+
+
+</body>
+</html>

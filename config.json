@@ -1,0 +1,14 @@
+{
+  "appId": "123456789",
+  "secret": "maple123456",
+  "host": {
+    "address": "localhost",
+    "port": 5799
+  },
+  "EslConfig": {
+    "fshost": "localhost",
+    "fsport": "8021",
+    "password": "ClueCon",
+    "timeout": 10
+  }
+}
