@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="db2fd161-2ed1-41da-a846-91c168d19fa8" name="默认更改列表" comment="" />
+    <list default="true" id="db2fd161-2ed1-41da-a846-91c168d19fa8" name="默认更改列表" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/css/element/fonts/element-icons.ttf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/css/element/fonts/element-icons.woff" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/css/element/index.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/html/SoftPhone.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/js/Vue/axios.min.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/js/element/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apis/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/apis/handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/router.go" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,19 +30,24 @@
     </option>
   </component>
   <component name="GOROOT" path="C:\Go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="GoLibraries">
     <option name="indexEntireGoPath" value="false" />
   </component>
   <component name="ProjectId" id="1jGksoux6kZ3S8CDFVPxWn93x50" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
     <property name="DefaultGoTemplateProperty" value="Go File" />
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="configurable.Global.GOPATH.is.expanded" value="true" />
     <property name="configurable.Module.GOPATH.is.expanded" value="false" />
     <property name="configurable.Project.GOPATH.is.expanded" value="true" />
     <property name="go.import.settings.migrated" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/static/css/element/fonts" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -41,12 +57,15 @@
     <property name="settings.editor.selected.configurable" value="com.goide.configuration.GoLibrariesConfigurableProvider" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\GoProject\src\github.com\n1n1n1_owner\ReportApi\static\css\element\fonts" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\GoProject\src\github.com\n1n1n1_owner\ReportApi\static\js\Vue" />
+      <recent name="D:\GoProject\src\github.com\n1n1n1_owner\ReportApi\static\css\element" />
+      <recent name="D:\GoProject\src\github.com\n1n1n1_owner\ReportApi\static\js\element" />
       <recent name="D:\GoProject\src\github.com\n1n1n1_owner\ReportApi\static\css" />
       <recent name="D:\GoProject\src\github.com\n1n1n1_owner\ReportApi\static\js\jsgrid" />
-      <recent name="D:\GoProject\src\github.com\n1n1n1_owner\ReportApi\static\js" />
-      <recent name="D:\GoProject\src\github.com\n1n1n1_owner\ReportApi\static\js\chart" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -126,6 +145,17 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>

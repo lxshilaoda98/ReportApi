@@ -279,20 +279,15 @@ func GetCpuInfoMonitor(c *gin.Context) {
 
 	//guest 当客户CPU执行hlt指令，它自愿产生CPU时间给其他客户。
 
-
 	//百分比计算每个CPU使用或组合使用的cpu的百分比。 如果给定的间隔为0，它将把当前的CPU时间与上次调用进行比较。
 	// 每个cpu返回一个值，如果percpu设置为false，则返回一个值。
 	syinfo, _ := cpu.Percent(time.Duration(time.Second), false)
 	fmt.Println(syinfo)
 
-
-
 }
 
-
-
 //获取物理内存和交换区内存信息
-func GetMemInfoMonitor(c *gin.Context){
+func GetMemInfoMonitor(c *gin.Context) {
 	memInfo, _ := mem.SwapMemory()
 	fmt.Println(memInfo)
 	fmt.Println(Crmhelper.FormatFileSize(int64(memInfo.Total)))
@@ -303,33 +298,33 @@ func GetMemInfoMonitor(c *gin.Context){
 }
 
 //可以通过psutil获取磁盘分区、磁盘使用率和磁盘IO信息
-func GetDiskInfoMonitor(c *gin.Context){
+func GetDiskInfoMonitor(c *gin.Context) {
 	query := c.DefaultQuery("id", "0")
 	info, _ := disk.Partitions(true) //所有分区
 	//fmt.Println(info)
-	numbers:=[]string{} //磁盘信息
-	SumNumber:=[]string{}//磁盘总容量
-	UseNumber:=[]string{}//磁盘使用量
-	DisBL :=[]string{} //磁盘使用情况，用了多少+剩余多少
-	infoStr:=[]*disk.UsageStat{}//磁盘列表详细信息
-	infoStrForDiskName :=[] disk.IOCountersStat{}
+	numbers := []string{}          //磁盘信息
+	SumNumber := []string{}        //磁盘总容量
+	UseNumber := []string{}        //磁盘使用量
+	DisBL := []string{}            //磁盘使用情况，用了多少+剩余多少
+	infoStr := []*disk.UsageStat{} //磁盘列表详细信息
+	infoStrForDiskName := []disk.IOCountersStat{}
 
 	RWIoNumber := make(map[string]uint64)
-	for k,_ :=range info {
+	for k, _ := range info {
 		numbers = append(numbers, info[k].Device)
 		info2, _ := disk.Usage(info[k].Device) //指定某路径的硬盘使用情况
 
 		i, e := strconv.Atoi(Crmhelper.GetGbFileSize(info2.Total))
 		if e != nil {
-			fmt.Println("convert String to Int Err..>",e)
+			fmt.Println("convert String to Int Err..>", e)
 		}
 		fi, e := strconv.Atoi(Crmhelper.GetGbFileSize(info2.Free))
 		if e != nil {
-			fmt.Println("convert String to Int Err..>",e)
+			fmt.Println("convert String to Int Err..>", e)
 		}
 		ui, _ := strconv.Atoi(Crmhelper.GetGbFileSize(info2.Used))
 
-		infoStr = append(infoStr,info2)
+		infoStr = append(infoStr, info2)
 
 		infoStr[k].Total = uint64(i)
 		infoStr[k].Free = uint64(fi)
@@ -338,28 +333,28 @@ func GetDiskInfoMonitor(c *gin.Context){
 		infoStr[k].UsedPercent = upc
 		ipc, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", info2.InodesUsedPercent), 64)
 		infoStr[k].InodesUsedPercent = ipc
-		SumStr :=Crmhelper.GetGbFileSize(info2.Total)
-		SumNumber=append(SumNumber,SumStr)
+		SumStr := Crmhelper.GetGbFileSize(info2.Total)
+		SumNumber = append(SumNumber, SumStr)
 
-		UseStr :=Crmhelper.GetGbFileSize(info2.Used)
-		UseNumber=append(UseNumber,UseStr)
+		UseStr := Crmhelper.GetGbFileSize(info2.Used)
+		UseNumber = append(UseNumber, UseStr)
 
-		FeeStr :=Crmhelper.GetGbFileSize(info2.Free)
+		FeeStr := Crmhelper.GetGbFileSize(info2.Free)
 		//添加指定的磁盘使用情况
-		if query ==info[k].Device {
+		if query == info[k].Device {
 			DisBL = append(DisBL, UseStr)
 			DisBL = append(DisBL, FeeStr)
 		}
 	}
 	info3, _ := disk.IOCounters("D:") //所有硬盘的io信息
-	for m,v := range info3{
-		if (query != "0"){
-			if query == m{
+	for m, v := range info3 {
+		if query != "0" {
+			if query == m {
 				infoStrForDiskName = append(infoStrForDiskName, v)
 
-				RWIoNumber["ReadCount"]=v.ReadCount
-				RWIoNumber["WriteCount"]=v.WriteCount
-				RWIoNumber["IopsInProgress"]=v.IopsInProgress
+				RWIoNumber["ReadCount"] = v.ReadCount
+				RWIoNumber["WriteCount"] = v.WriteCount
+				RWIoNumber["IopsInProgress"] = v.IopsInProgress
 				//RWIoNumber=append(RWIoNumber,v.ReadCount,v.WriteCount,v.IopsInProgress )
 			}
 			//fmt.Println("找到值..>",query)
@@ -367,20 +362,20 @@ func GetDiskInfoMonitor(c *gin.Context){
 
 		//fmt.Println("v..>",v,"m..>",m)
 	}
-	c.HTML(200,"DiskInfo.html",gin.H{
-			"RWIoNumber":RWIoNumber,
-			"DisBL":DisBL,
-			"IoDiskInfo":infoStrForDiskName, //渲染磁盘io
-			"cMapDiskForIo":info3,
-			"DiskInfo":infoStr,
-			"DiskLen":numbers,
-			"SumNumber":SumNumber,
-			"UseNumber":UseNumber,
+	c.HTML(200, "DiskInfo.html", gin.H{
+		"RWIoNumber":    RWIoNumber,
+		"DisBL":         DisBL,
+		"IoDiskInfo":    infoStrForDiskName, //渲染磁盘io
+		"cMapDiskForIo": info3,
+		"DiskInfo":      infoStr,
+		"DiskLen":       numbers,
+		"SumNumber":     SumNumber,
+		"UseNumber":     UseNumber,
 	})
 }
 
 //获取当前网络连接信息
-func GetNetInfoMonitor(c *gin.Context){
+func GetNetInfoMonitor(c *gin.Context) {
 	info, _ := net.Connections("all") //可填入tcp、udp、tcp4、udp4等等 all 查询全部的连接
 	//fmt.Println(info)
 
@@ -390,18 +385,18 @@ func GetNetInfoMonitor(c *gin.Context){
 	//c.HTML(200,"index.html",gin.H{
 	//	"data":info2,
 	//})
-	c.HTML(http.StatusOK,"index.html",gin.H{
-		"code":0,
-		"res":info2,
-		"nres":info,
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"code": 0,
+		"res":  info2,
+		"nres": info,
 	})
 }
 
-func GetProcessByIdInfoMonitor(c *gin.Context){
-	pid:=c.DefaultQuery("id","")
+func GetProcessByIdInfoMonitor(c *gin.Context) {
+	pid := c.DefaultQuery("id", "")
 	pidInt, _ := strconv.Atoi(pid)
 
-	fmt.Println("进入byID..>",c.DefaultQuery("id",""))
+	fmt.Println("进入byID..>", c.DefaultQuery("id", ""))
 	newProcess, _ := process.NewProcess(int32(pidInt))
 
 	fmt.Println(newProcess)
@@ -413,10 +408,12 @@ func GetProcessByIdInfoMonitor(c *gin.Context){
 
 }
 
+func GetFreeSwitchInfoMonitor(c *gin.Context) {
+	c.HTML(http.StatusOK, "FreeswitchMonitor.html", gin.H{})
+}
 
-
-func GetFreeSwitchInfoMonitor(c *gin.Context){
-	c.HTML(http.StatusOK,"FreeswitchMonitor.html",gin.H{
-
+func GetSoftPhoneHtml(c *gin.Context) {
+	c.HTML(http.StatusOK, "SoftPhone.html", gin.H{
+		"message": "ssss",
 	})
 }
