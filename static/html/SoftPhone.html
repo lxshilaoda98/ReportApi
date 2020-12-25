@@ -8,44 +8,130 @@
     <script src="/static/js/Vue/vue.js"></script>
     <!-- import JavaScript -->
     <script src="/static/js/element/index.js"></script>
+    <script src="/static/js/jquery-3.5.1.min.js"></script>
+
+    <script src="/static/js/SoftPhone/code.js"></script>
+    <script src="/static/js/Vue/axios.min.js"></script>
+
+
+
 </head>
 <body>
 <div id="app">
+    <!--bar init-->
     <el-row>
-        <el-input :disabled="true" style="width: 120px"></el-input>
+        <el-input :disabled="true" style="width: 120px" id="StatusInput"></el-input>
+        <el-switch
+                v-model="StateValue"
+                active-color="#13ce66"
+                inactive-color="#ff4949"
+                @change="ChangeState">
+        </el-switch>
+        <el-button @click="CallHangup" id="HangupVis">挂机</el-button>
+        <el-button @click="HoldCall" id="HoldVis">保持</el-button>
+        <el-button @click="UnHoldCall" id="UnHoldVis">取消保持</el-button>
+        <el-button @click="dialogFormVisible = true" id="TaskVis">呼叫电话</el-button>
+        <el-button @click="CallAgentList" id="TaskAgentVis">呼叫坐席</el-button>
+        <el-button @click="dialogFormTransfer = true" id="TransferPoneVis">盲转</el-button>
 
-        <el-button @click="dialogVisible = true">挂机</el-button>
-        <el-button>保持</el-button>
-        <el-button @click="dialogFormVisible = true">呼叫电话</el-button>
-        <el-button @click="dialogTableVisible = true">呼叫坐席</el-button>
-        <el-button>转接</el-button>
+        <el-button id="zxAniVis" @click="zxDialog = true">咨询外线</el-button>
+        <el-button id="zxAgentVis" @click="zxAgentList">咨询坐席</el-button>
+
+        <el-dropdown @command="AfterOperation">
+            <el-button id="AfterOperationVis">
+                后操作<i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+            <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item command="1">取回</el-dropdown-item>
+                <el-dropdown-item command="2">转接</el-dropdown-item>
+                <el-dropdown-item command="3">会议</el-dropdown-item>
+            </el-dropdown-menu>
+        </el-dropdown>
+
+        <el-button @click="ToSatisfaction" id="SatisfactionVis">满意度</el-button>
+        <el-button @click="ConfigClick">配置</el-button>
 
     </el-row>
 
+    <!--未用到  可用到弹屏-->
     <el-dialog
             title="提示"
             :visible.sync="dialogVisible"
             width="30%"
             :before-close="handleClose">
-        <span>这是一段信息</span>
+        <span v-text="'来电号码:'+CAni"> </span>
         <span slot="footer" class="dialog-footer">
-    <el-button @click="dialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="dialogVisible = false">摘 机</el-button>
+    <el-button @click="AlertAniHangup">取 消</el-button>
+    <el-button type="primary" @click="AlertTalk">摘 机</el-button>
         </span>
     </el-dialog>
 
-    <el-dialog title="收货地址" :visible.sync="dialogTableVisible">
+    <!--咨询外线-->
+    <el-dialog title="请输入号码" :visible.sync="zxDialog" :width="FromTask">
+        <el-form>
+            <el-form-item label="号码" :label-width="formLabelWidth">
+                <el-input v-model="zxAniText" type="tel" clearable></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="zxDialog = false">取 消</el-button>
+            <el-button type="primary" @click="zxAniClick">确 定</el-button>
+        </div>
+    </el-dialog>
+
+    <!--咨询坐席-->
+    <el-dialog title="坐席" :visible.sync="zxAgentDialog">
         <el-table
                 :data="gridData"
                 highlight-current-row
-                @current-change="handleCurrentChange">
+                @row-click="handleCurrentChange">
             <el-table-column
                     type="index"
                     width="50">
             </el-table-column>
-            <el-table-column property="date" label="日期" width="150"></el-table-column>
+
             <el-table-column property="name" label="姓名" width="200"></el-table-column>
-            <el-table-column property="address" label="地址"></el-table-column>
+            <el-table-column property="contact" label="联系方式"></el-table-column>
+            <el-table-column property="status" label="状态"></el-table-column>
+            <el-table-column property="state" label="状态"></el-table-column>
+        </el-table>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="zxAgentDialog = false">取 消</el-button>
+            <el-button type="primary" @click="">确 定</el-button>
+        </div>
+    </el-dialog>
+
+
+    <!--盲转dialog-->
+    <el-dialog title="请输入号码" :visible.sync="dialogFormTransfer" :width="FromTask">
+        <el-form>
+            <el-form-item label="号码" :label-width="formLabelWidth">
+                <el-input v-model="TransferAni" type="tel" clearable></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormTransfer = false">取 消</el-button>
+            <el-button type="primary" @click="TransferPone">确 定</el-button>
+        </div>
+    </el-dialog>
+
+    <!--呼叫坐席的dialog-->
+    <el-dialog title="坐席" :visible.sync="dialogTableVisible">
+        <el-table
+                :data="gridData"
+                highlight-current-row
+                @row-click="handleCurrentChange">
+            <el-table-column
+                    type="index"
+                    width="50">
+            </el-table-column>
+
+            <el-table-column property="name" label="姓名" width="200"></el-table-column>
+            <el-table-column property="contact" label="联系方式"></el-table-column>
+            <el-table-column property="status" label="状态"></el-table-column>
+            <el-table-column property="state" label="状态"></el-table-column>
+
+
         </el-table>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogTableVisible = false">取 消</el-button>
@@ -53,82 +139,34 @@
         </div>
     </el-dialog>
 
-
+    <!--呼叫外线的dialog-->
     <el-dialog title="外线号码" :visible.sync="dialogFormVisible" :width="FromTask">
-        <el-form :model="form">
+        <el-form>
             <el-form-item label="号码" :label-width="formLabelWidth">
                 <el-input v-model="form.name" type="tel" clearable></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
-            <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+            <el-button type="primary" @click="MakeCallAni">确 定</el-button>
         </div>
     </el-dialog>
 
-    <p v-text="message+'6677'"></p>
+    <!--配置分机的dialog-->
+    <el-dialog title="配置分机" :visible.sync="ExtensionVisible" :width="FromTask">
+        <el-form>
+            <el-form-item label="分机号码" :label-width="formLabelWidth">
+                <el-input v-model="form.extension" type="text" id="ConfigExtension"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="ExtensionVisible = false">取 消</el-button>
+            <el-button type="primary" @click="ExtensionConfig">确 定</el-button>
+        </div>
+    </el-dialog>
 </div>
 
 </body>
 
-<script>
-    new Vue({
-        el: '#app',
-        data: function () {
-            return {
-                message:"11111",
-                TranAgentClick: function () {
-                    alert('asdas')
-                },
-                handleCurrentChange: function (val) {
-
-                },
-                dialogVisible: false,
-                visible: false,
-                dialogFormVisible: false,
-                dialogTableVisible: false,
-                formLabelWidth: '40px',
-                FromTask: '380px',
-
-                form: {
-                    name: '',
-                    region: '',
-                    date1: '',
-                    date2: '',
-                    delivery: false,
-                    type: [],
-                    resource: '',
-                    desc: ''
-                },
-                gridData: [{
-                    date: '2016-05-02',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1518 弄'
-                }, {
-                    date: '2016-05-04',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1518 弄'
-                }, {
-                    date: '2016-05-01',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1518 弄'
-                }, {
-                    date: '2016-05-03',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1518 弄'
-                }]
-            }
-        },
-        methods: {
-            handleClose(done) {
-                this.$confirm('确认关闭？')
-                    .then(_ => {
-                        done();
-                    })
-                    .catch(_ => {});
-            }
-        }
-    })
-
-</script>
+<script src="/static/js/SoftPhone/VueCode.js"></script>
 </html>

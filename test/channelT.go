@@ -1,35 +1,37 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	//_ "github.com/mkevac/debugcharts"
-	"github.com/shirou/gopsutil/host"
-	"net/http"
-	//_ "net/http/pprof"
+	_ "odbc/driver"
 )
 
-func CInfo(w http.ResponseWriter, r *http.Request) {
-	info, _ := host.Info()
-	fmt.Println(info.String())
-	w.Write([]byte(info.String()))
-}
-
 func main() {
-
-	//创建路由
-	r:=gin.Default()
-	//绑定路由规则，执行函数
-	r.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK,"Hello Word!")
-	})
-	r.Run(":6633")
-	//提供给负载均衡探活以及pprof调试
-
-
-	//http.HandleFunc("/CpuInfo", CInfo)
-
-	//http.Handle("/metrics", promhttp.Handler())
-
-	//http.ListenAndServe(":10108", nil)
+	conn, err := sql.Open("odbc", "driver={Microsoft Access Driver (*.mdb)};dbq=d:\\test.mdb")
+	if err != nil {
+		fmt.Println("Connecting Error")
+		return
+	}
+	defer conn.Close()
+	stmt, err := conn.Prepare("select * from test")
+	if err != nil {
+		fmt.Println("Query Error")
+		return
+	}
+	defer stmt.Close()
+	row, err := stmt.Query()
+	if err != nil {
+		fmt.Println("Query Error")
+		return
+	}
+	defer row.Close()
+	for row.Next() {
+		var id int
+		var name string
+		if err := row.Scan(&id, &name); err == nil {
+			fmt.Println(id, name)
+		}
+	}
+	fmt.Printf("%s\n", "finish")
+	return
 }
