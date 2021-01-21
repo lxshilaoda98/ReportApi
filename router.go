@@ -32,14 +32,73 @@ func InitRouter() *gin.Engine {
 	router.StaticFS("/static", http.Dir("./static"))
 
 	//router.Static("js","js")
-
+	//跨域
+	router.Use(Cors())
 	//加载中间件
 	router.Use(MiddleWare())
 	//router.GET("/", IndexApi)
 	//
 	//router.POST("/person", AddPersonApi)
 
+	/**
+	fs相关处理
+	*/
+	//查看拨号计划
 	router.GET("/dialplans", GetDialplan)
+	router.GET("/dialplanByOid", GetDialplanByOid)
+	router.PUT("/EditDialplan", EditDialplan)
+	router.POST("/AddDialplan", AddDialplan)
+	router.DELETE("/DelDialplan/:Oid", DelDialplan)
+
+	//查看拨号计划子模块 =根据dialplan的id查询子模块的信息
+	router.GET("/dialplanAppByOid", GetDialplanAppByBOid)
+	router.PUT("/EditDialplanApp", EditDialplanApp)
+	router.POST("/AddDialplanApp", AddDialplanApp)
+	router.DELETE("/DelDialplanApp/:Oid", DelDialplanApp)
+
+	//呼叫中心相关
+
+	router.GET("/GetCCUserByName", GetCCUserByName)
+	router.GET("/CCUserAll", GetCCUserAll)
+	router.POST("/AddCCUser", AddCCUser)
+	router.PUT("/EditCCUser", EditCCUser)
+	router.DELETE("/DelCCUser/:Oid", DelCCUser)
+
+	//排队策略
+	router.GET("/GetTiers", GetTiers)
+	router.POST("/AddTiers", AddTiers)
+	router.PUT("/EditTiers", EditTiers)
+	router.DELETE("/DelTiers/:Oid", DelTiers)
+
+	//查看注册的用户信息
+	router.GET("/registrations", GetRegistrations)
+
+	//查看值列表数据 （下拉框数据）
+	router.GET("/GetTypeListByVal", GetTypeListByVal)
+	router.GET("/typeList", GetTypeList)
+	router.POST("/AddTypeList", AddTypeList)
+	router.DELETE("/DelTypeList/:Oid", DelTypeList)
+	router.PUT("/EditTypeList", EditTypeList)
+	router.GET("/GetTypeListByType", GetTypeListByType)
+
+	//查看排队数量
+	router.GET("/GetMembers", GetMembers)
+	router.DELETE("/DelMember/:Oid", DelMember)
+
+	//sip用户信息 相关
+	router.GET("/sipUser", GetAllSipUser)
+	router.POST("/AddSipUser", AddSipUser)
+	router.DELETE("/DelSipUser/:Oid", DelSipUser)
+	router.PUT("/EditSipUser", EditSipUser)
+
+	//sip网关相关
+	router.GET("/gateWay", GetGateWay)
+	router.POST("/AddGateWay", AddGateWay)
+	router.DELETE("/DelGateWay/:Oid", DelGateWay)
+	router.PUT("/EditGateWay", EditGateWay)
+
+	//文件相关..
+	router.POST("/file/upload", FileUpload)
 
 	//router.GET("/person/:id", GetPersonApi)
 	//
@@ -53,7 +112,7 @@ func InitRouter() *gin.Engine {
 
 	router.GET("/CallCountStatis", GetCallCountStatis)
 
-	router.GET("/GetJysAgent", GetJysAgent)
+	router.GET("/GetJysAgent", GetJysAgent) //弃用
 
 	//########测试路由
 
@@ -81,7 +140,11 @@ func InitRouter() *gin.Engine {
 
 		groupName.GET("/freeswitch", GetFreeSwitchInfoMonitor)
 	}
+	/**
+	电话条相关
+	*/
 	router.GET("/softphone", GetSoftPhoneHtml)
+	router.GET("/softphoneRTC", GetSoftPhoneRTCHtml)
 
 	router.GET("/cookie", func(c *gin.Context) {
 		s, e := c.Cookie("namekey")

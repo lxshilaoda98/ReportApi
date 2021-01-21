@@ -18,6 +18,412 @@ import (
 	//jys "github.com/n1n1n1_owner/ReportApi/models/ivrConter/jys"
 )
 
+func Cors() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		method := c.Request.Method
+
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Headers", "Content-Type,AccessToken,X-CSRF-Token, Authorization, Token")
+		c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE ,PUT")
+		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type")
+		c.Header("Access-Control-Allow-Credentials", "true")
+
+		//放行所有OPTIONS方法
+		if method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+		}
+		// 处理请求
+		c.Next()
+	}
+}
+
+//type TypeList struct {
+//	Name string
+//	state string
+//	store string
+//	title string
+//	typeL string
+//}
+
+//文件相关
+func FileUpload(c *gin.Context) {
+	result := models.ResultClass{}
+	file, header, err := c.Request.FormFile("file")
+	fmt.Println("upLoad.Name.File.>", header.Filename)
+	if err == nil {
+		result.Up(file, header)
+	} else {
+		result.Code = -1
+		result.Msg = "接收文件出错"
+	}
+	c.JSON(http.StatusOK, result)
+}
+
+//排队相关 begin
+func GetMembers(c *gin.Context) {
+	page := c.DefaultQuery("page", "1")
+	pagesize := c.DefaultQuery("pagesize", "10")
+	var data_page, _ = strconv.Atoi(page)
+	var data_pagesize, _ = strconv.Atoi(pagesize)
+
+	start := (data_page - 1) * data_pagesize
+	end := data_pagesize * 1
+	r := models.Member{}
+	registrations, err := r.GetMembers(start, end)
+	//查询一共多少条数据
+	count := r.GetMemberCount()
+
+	if err != nil {
+		fmt.Printf("sql error .>>", err)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":   20000,
+		"result": registrations,
+		"count":  len(registrations),
+		"limit":  count.Number,
+	})
+
+	fmt.Printf("查看当前页:%d ,每页显示个数:%d \n", data_page, end)
+}
+func DelMember(c *gin.Context) {
+	r := models.Member{}
+	r.Uuid = c.Param("Oid")
+	if id, err := r.DelMember(); err != nil {
+		fmt.Println("【DelMember】 Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+
+//排队相关 end
+
+//值列表 相关 begin
+func EditTypeList(c *gin.Context) {
+	r := models.TypeList{}
+	r.Oid = c.Request.FormValue("oid")
+	r.Name = c.Request.FormValue("name")
+	r.Val = c.Request.FormValue("val")
+	r.State = c.Request.FormValue("state")
+	r.Sort = c.Request.FormValue("store")
+	r.Title = c.Request.FormValue("title")
+	r.TypeL = c.Request.FormValue("typeL")
+
+	if id, err := r.EditTypeList(r); err != nil {
+		fmt.Println("【EditTypeList】接受到错误信息Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+func DelTypeList(c *gin.Context) {
+	r := models.TypeList{}
+	r.Oid = c.Param("Oid")
+	if id, err := r.DelTypeList(); err != nil {
+		fmt.Println("【DelTypeList】 Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+func AddTypeList(c *gin.Context) {
+	r := models.TypeList{}
+	r.Name = c.Request.FormValue("name")
+	r.Val = c.Request.FormValue("val")
+	r.State = c.Request.FormValue("state")
+	r.Sort = c.Request.FormValue("store")
+	r.Title = c.Request.FormValue("title")
+	r.TypeL = c.Request.FormValue("typeL")
+
+	if id, err := r.AddTypeList(r); err != nil {
+		fmt.Println("【AddTypeList】接受到错误信息Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+func GetTypeList(c *gin.Context) {
+	page := c.DefaultQuery("page", "1")
+	pagesize := c.DefaultQuery("pagesize", "10")
+	var data_page, _ = strconv.Atoi(page)
+	var data_pagesize, _ = strconv.Atoi(pagesize)
+
+	start := (data_page - 1) * data_pagesize
+	end := data_pagesize * 1
+	r := models.TypeList{}
+	registrations, err := r.GetTypeLists(start, end)
+	//查询一共多少条数据
+	count := r.GetTypeListCount()
+
+	if err != nil {
+		fmt.Printf("sql error .>>", err)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":   20000,
+		"result": registrations,
+		"count":  len(registrations),
+		"limit":  count.Number,
+	})
+
+	fmt.Printf("查看当前页:%d ,每页显示个数:%d \n", data_page, end)
+}
+func GetTypeListByType(c *gin.Context) {
+	types := c.DefaultQuery("type", "1")
+	r := models.TypeList{}
+	registrations, err := r.GetTypeListByType(types)
+	if err != nil {
+		fmt.Printf("sql error .>>", err)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":   20000,
+		"result": registrations,
+	})
+}
+func GetTypeListByVal(c *gin.Context) {
+	types := c.DefaultQuery("val", "1")
+	r := models.TypeList{}
+	registrations, err := r.GetTypeListByVal(types)
+	if err != nil {
+		fmt.Printf("sql error .>>", err)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":   20000,
+		"result": registrations,
+	})
+}
+
+//值列表 相关 end
+
+//sip用户相关 begin
+func GetAllSipUser(c *gin.Context) {
+	page := c.DefaultQuery("page", "1")
+	pagesize := c.DefaultQuery("pagesize", "10")
+	var data_page, _ = strconv.Atoi(page)
+	var data_pagesize, _ = strconv.Atoi(pagesize)
+
+	start := (data_page - 1) * data_pagesize
+	end := data_pagesize * 1
+	s := models.SipUser{}
+	registrations, err := s.GetSipUser(start, end)
+	//查询一共多少条数据
+	count := s.GetSipUserCount()
+
+	if err != nil {
+		fmt.Printf("sql error .>>", err)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":   20000,
+		"result": registrations,
+		"count":  len(registrations),
+		"limit":  count.Number,
+	})
+
+	fmt.Printf("查看当前页:%d ,每页显示个数:%d \n", data_page, end)
+}
+func EditSipUser(c *gin.Context) {
+	s := models.SipUser{}
+	s.Oid = c.Request.FormValue("oid")
+	s.SIPUser = c.Request.FormValue("sipuser")
+	s.Password = c.Request.FormValue("password")
+	s.Callgroup = c.Request.FormValue("callgroup")
+	s.GroupName = c.DefaultPostForm("groupName", "测试")
+
+	if id, err := s.EditSipUser(s); err != nil {
+		fmt.Println("【EditSipUser】错误信息Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+func DelSipUser(c *gin.Context) {
+	s := models.SipUser{}
+	s.Oid = c.Param("Oid")
+	if id, err := s.DelSipUser(); err != nil {
+		fmt.Println("【DelSipUser】 Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+func AddSipUser(c *gin.Context) {
+	s := models.SipUser{}
+
+	s.SIPUser = c.Request.FormValue("sipuser")
+	s.Password = c.Request.FormValue("password")
+	s.Callgroup = c.Request.FormValue("callgroup")
+	s.GroupName = c.DefaultPostForm("groupName", "测试")
+
+	if id, err := s.AddSipUser(s); err != nil {
+		fmt.Println("【AddSipUser】接受到错误信息Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+
+//sip用户相关 end
+
+// 网关相关 begin
+func GetGateWay(c *gin.Context) {
+	page := c.DefaultQuery("page", "1")
+	pagesize := c.DefaultQuery("pagesize", "10")
+	var data_page, _ = strconv.Atoi(page)
+	var data_pagesize, _ = strconv.Atoi(pagesize)
+
+	start := (data_page - 1) * data_pagesize
+	end := data_pagesize * 1
+	g := models.GateWay{}
+	gateWays, err := g.GetGateWay(start, end)
+	//查询一共多少条数据
+	count := g.GetGateWayCount()
+
+	if err != nil {
+		fmt.Printf("sql error .>>", err)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":   20000,
+		"result": gateWays,
+		"count":  len(gateWays),
+		"limit":  count.Number,
+	})
+
+	fmt.Printf("查看当前页:%d ,每页显示个数:%d \n", data_page, end)
+}
+func AddGateWay(c *gin.Context) {
+	g := models.GateWay{}
+	g.Name = c.Request.FormValue("name")
+	g.Realm = c.Request.FormValue("realm")
+	g.Username = c.Request.FormValue("username")
+	g.Register = c.Request.FormValue("register")
+	g.Memo = c.Request.FormValue("memo")
+	g.Password = c.Request.FormValue("password")
+
+	if id, err := g.AddGateWay(g); err != nil {
+		fmt.Println("【AddGateWay】错误信息Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+func DelGateWay(c *gin.Context) {
+	g := models.GateWay{}
+	g.Oid = c.Param("Oid")
+	if id, err := g.DelGateWay(); err != nil {
+		fmt.Println("【DelGateWay】 Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+func EditGateWay(c *gin.Context) {
+	g := models.GateWay{}
+	g.Oid = c.Request.FormValue("oid")
+	g.Name = c.Request.FormValue("name")
+	g.Realm = c.Request.FormValue("realm")
+	g.Username = c.Request.FormValue("username")
+	g.Register = c.Request.FormValue("register")
+	g.Memo = c.Request.FormValue("memo")
+	g.Password = c.Request.FormValue("password")
+
+	if id, err := g.EditGateWay(g); err != nil {
+		fmt.Println("【EditGateWay】错误信息Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+
+// 网关相关 end
+
+//查询注册用户
+func GetRegistrations(c *gin.Context) {
+	page := c.DefaultQuery("page", "1")
+	pagesize := c.DefaultQuery("pagesize", "10")
+	var data_page, _ = strconv.Atoi(page)
+	var data_pagesize, _ = strconv.Atoi(pagesize)
+
+	start := (data_page - 1) * data_pagesize
+	end := data_pagesize * 1
+	r := models.Registrations{}
+	registrations, err := r.GetRegistrations(start, end)
+	//查询一共多少条数据
+	count := r.GetRegistrationCount()
+
+	if err != nil {
+		fmt.Printf("sql error .>>", err)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":   20000,
+		"result": registrations,
+		"count":  len(registrations),
+		"limit":  count.Number,
+	})
+
+	fmt.Printf("查看当前页:%d ,每页显示个数:%d \n", data_page, end)
+
+}
+
+//查询拨号计划 begin
 func GetDialplan(c *gin.Context) {
 
 	page := c.DefaultQuery("page", "1")
@@ -30,16 +436,385 @@ func GetDialplan(c *gin.Context) {
 	end := data_pagesize * 1
 	p := models.Dialplan{}
 	dialplans, err := p.GetDialplan(start, end)
+	//查询一共多少条数据
+	count := p.GetDialplanCount()
+
 	if err != nil {
 		fmt.Printf("sql error .>>", err)
 	}
 	c.JSON(http.StatusOK, gin.H{
+		"code":   20000,
 		"result": dialplans,
 		"count":  len(dialplans),
+		"limit":  count.Number,
 	})
 
 	fmt.Printf("查看当前页:%d ,每页显示个数:%d \n", data_page, end)
 }
+func GetDialplanByOid(c *gin.Context) {
+	oid := c.DefaultQuery("oid", "1")
+	var roid, _ = strconv.Atoi(oid)
+
+	p := models.Dialplan{}
+	dialplans, err := p.GetDialplanByOid(roid)
+
+	if err != nil {
+		fmt.Printf("sql error .>>", err)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":   20000,
+		"result": dialplans,
+	})
+}
+func EditDialplan(c *gin.Context) {
+	d := models.Dialplan{}
+	d.Oid = c.Request.FormValue("oid")
+	d.Condition = c.Request.FormValue("condition")
+	d.Context = c.Request.FormValue("context")
+	d.Domain = c.Request.FormValue("domain")
+	d.Expression = c.Request.FormValue("expression")
+	d.Description = c.Request.FormValue("description")
+	d.Name = c.Request.FormValue("name")
+
+	fmt.Println("要修改的dialplan..Oid...>", d.Oid)
+	if id, err := d.EditDialplan(d); err != nil {
+		fmt.Println("【EditDialplan】错误信息Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+func AddDialplan(c *gin.Context) {
+	d := models.Dialplan{}
+	d.Oid = c.Request.FormValue("oid")
+	d.Condition = c.Request.FormValue("condition")
+	d.Context = c.Request.FormValue("context")
+	d.Domain = c.Request.FormValue("domain")
+	d.Expression = c.Request.FormValue("expression")
+	d.Description = c.Request.FormValue("description")
+	d.Name = c.Request.FormValue("name")
+	if id, err := d.AddDialplan(d); err != nil {
+		fmt.Println("【AddDialplan】错误信息Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+func DelDialplan(c *gin.Context) {
+	d := models.Dialplan{}
+	d.Oid = c.Param("Oid")
+	if id, err := d.DelDialplan(); err != nil {
+		fmt.Println("【DelDialplan】 Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+
+//查询拨号计划 end
+
+//针对Dialplan_APP dialplanOid 查询
+func GetDialplanAppByBOid(c *gin.Context) {
+	page := c.DefaultQuery("page", "1")
+	pagesize := c.DefaultQuery("pagesize", "10")
+	dialplan := c.DefaultQuery("dialplan", "1")
+
+	var data_page, _ = strconv.Atoi(page)
+	var data_pagesize, _ = strconv.Atoi(pagesize)
+
+	dialplanOid, _ := strconv.Atoi(dialplan)
+	start := (data_page - 1) * data_pagesize
+	end := data_pagesize * 1
+	d := models.DialplanApp{}
+	dialplans, err := d.GetDialplanApp(dialplanOid, start, end)
+	//查询一共多少条数据
+	count := d.GetDialplanAppCount(dialplanOid)
+
+	if err != nil {
+		fmt.Printf("sql error .>>", err)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":   20000,
+		"result": dialplans,
+		"count":  len(dialplans),
+		"limit":  count.Number,
+	})
+
+	fmt.Printf("查看当前页:%d ,每页显示个数:%d \n", data_page, end)
+}
+func EditDialplanApp(c *gin.Context) {
+	d := models.DialplanApp{}
+	d.Oid = c.Request.FormValue("oid")
+	d.Application = c.Request.FormValue("application")
+	d.Data = c.Request.FormValue("data")
+	d.Sort = c.Request.FormValue("sort")
+
+	if id, err := d.EditDialplanApp(d); err != nil {
+		fmt.Println("【EditDialplanApp】错误信息Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+func AddDialplanApp(c *gin.Context) {
+	d := models.DialplanApp{}
+	d.Application = c.Request.FormValue("application")
+	d.Data = c.Request.FormValue("data")
+	d.Sort = c.Request.FormValue("sort")
+	d.Dialplan = c.Request.FormValue("dialplanOid")
+
+	if id, err := d.AddDialplanApp(d); err != nil {
+		fmt.Println("【AddDialplanApp】错误信息Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+func DelDialplanApp(c *gin.Context) {
+	d := models.DialplanApp{}
+	d.Oid = c.Param("Oid")
+	if id, err := d.DelDialplanApp(); err != nil {
+		fmt.Println("【DelDialplanApp】 Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+
+//end
+
+//呼叫中心相关 begin
+func GetCCUserByName(c *gin.Context) {
+	//name := c.DefaultQuery("name", "1")
+	cc := models.CCUser{}
+	dialplans, err := cc.GetCCUserByName()
+	//查询一共多少条数据
+	//count := cc.GetCCUserCount()
+	if err != nil {
+		fmt.Printf("sql error .>>", err)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":   20000,
+		"result": dialplans,
+		"count":  len(dialplans),
+		//"limit":  count.Number,
+	})
+}
+func GetCCUserAll(c *gin.Context) {
+
+	page := c.DefaultQuery("page", "1")
+	pagesize := c.DefaultQuery("pagesize", "10")
+
+	var data_page, _ = strconv.Atoi(page)
+	var data_pagesize, _ = strconv.Atoi(pagesize)
+
+	start := (data_page - 1) * data_pagesize
+	end := data_pagesize * 1
+	cc := models.CCUser{}
+	dialplans, err := cc.GetAllCCUser(start, end)
+	//查询一共多少条数据
+	count := cc.GetCCUserCount()
+
+	if err != nil {
+		fmt.Printf("sql error .>>", err)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":   20000,
+		"result": dialplans,
+		"count":  len(dialplans),
+		"limit":  count.Number,
+	})
+
+	fmt.Printf("查看当前页:%d ,每页显示个数:%d \n", data_page, end)
+}
+func AddCCUser(c *gin.Context) {
+	cc := models.CCUser{}
+	cc.Name = c.Request.FormValue("name")
+	cc.Contact = c.Request.FormValue("contact")
+	cc.Max_no_answer = c.Request.FormValue("max_no_answer")
+	cc.Wrap_up_time = c.Request.FormValue("wrap_up_time")
+	cc.Reject_delay_time = c.Request.FormValue("reject_delay_time")
+	cc.Busy_delay_time = c.Request.FormValue("busy_delay_time")
+	cc.No_answer_delay_time = c.Request.FormValue("no_answer_delay_time")
+
+	if id, err := cc.AddCCUser(cc); err != nil {
+		fmt.Println("【AddCCUser】错误信息Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+func EditCCUser(c *gin.Context) {
+	cc := models.CCUser{}
+	cc.Name = c.Request.FormValue("name")
+	cc.Contact = c.Request.FormValue("contact")
+	cc.Max_no_answer = c.Request.FormValue("max_no_answer")
+	cc.Wrap_up_time = c.Request.FormValue("wrap_up_time")
+	cc.Reject_delay_time = c.Request.FormValue("reject_delay_time")
+	cc.Busy_delay_time = c.Request.FormValue("busy_delay_time")
+	cc.No_answer_delay_time = c.Request.FormValue("no_answer_delay_time")
+
+	if id, err := cc.EditCCUser(cc); err != nil {
+		fmt.Println("【AddCCUser】错误信息Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+func DelCCUser(c *gin.Context) {
+	d := models.CCUser{}
+	d.Name = c.Param("Oid")
+	if id, err := d.DelCCUser(); err != nil {
+		fmt.Println("【DelCCUser】 Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+
+//呼叫中心相关 end
+
+//获取呼入策略 begin
+func GetTiers(c *gin.Context) {
+
+	page := c.DefaultQuery("page", "1")
+	pagesize := c.DefaultQuery("pagesize", "10")
+
+	var data_page, _ = strconv.Atoi(page)
+	var data_pagesize, _ = strconv.Atoi(pagesize)
+
+	start := (data_page - 1) * data_pagesize
+	end := data_pagesize * 1
+	cc := models.Tiers{}
+	dialplans, err := cc.GetTiers(start, end)
+	//查询一共多少条数据
+	count := cc.GetTiersCount()
+
+	if err != nil {
+		fmt.Printf("sql error .>>", err)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":   20000,
+		"result": dialplans,
+		"count":  len(dialplans),
+		"limit":  count.Number,
+	})
+
+	fmt.Printf("查看当前页:%d ,每页显示个数:%d \n", data_page, end)
+}
+func AddTiers(c *gin.Context) {
+	cc := models.Tiers{}
+	cc.Queue = c.Request.FormValue("queue")
+	cc.Agent = c.Request.FormValue("agent")
+	cc.Level = c.Request.FormValue("level")
+	cc.Position = c.Request.FormValue("position")
+
+	if id, err := cc.AddTiers(cc); err != nil {
+		fmt.Println("【AddTiers】错误信息Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+func EditTiers(c *gin.Context) {
+	cc := models.Tiers{}
+	cc.Oid = c.Request.FormValue("oid")
+	cc.Queue = c.Request.FormValue("queue")
+	cc.Agent = c.Request.FormValue("agent")
+	cc.Level = c.Request.FormValue("level")
+	cc.Position = c.Request.FormValue("position")
+
+	if id, err := cc.EditTiers(cc); err != nil {
+		fmt.Println("【EditTiers】错误信息Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+func DelTiers(c *gin.Context) {
+	d := models.Tiers{}
+	d.Oid = c.Param("Oid")
+	if id, err := d.DelTiers(); err != nil {
+		fmt.Println("【DelTiers】 Err.>", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  err,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"oid":  id,
+		})
+	}
+}
+
+//获取呼入策略 end
 
 //IVR呼叫量统计呼入参数
 func GetIvrStatis(c *gin.Context) {
@@ -170,6 +945,7 @@ func GetCallCountStatis(c *gin.Context) {
 
 }
 
+//弃用 （给美康检验所写的ivr流程）
 func GetJysAgent(c *gin.Context) {
 	Ani := c.DefaultQuery("Ani", "17600082595")
 	a := jys.Agent{}
@@ -412,8 +1188,14 @@ func GetFreeSwitchInfoMonitor(c *gin.Context) {
 	c.HTML(http.StatusOK, "FreeswitchMonitor.html", gin.H{})
 }
 
+/**
+转接到 软电话测试页面
+*/
 func GetSoftPhoneHtml(c *gin.Context) {
 	c.HTML(http.StatusOK, "SoftPhone.html", gin.H{
 		"message": "ssss",
 	})
+}
+func GetSoftPhoneRTCHtml(c *gin.Context) {
+	c.HTML(http.StatusOK, "SoftPhoneRTC.html", gin.H{})
 }

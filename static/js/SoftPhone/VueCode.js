@@ -494,7 +494,10 @@ function ButtonVisForStatus(Status) {
             break;
         case "话后状态":
             vue.DlVisible('话后状态');
+            $("#UnHoldVis").hide();
+            $("#HoldVis").show();
             $("#StatusInput").val('话后状态');
+
             $("#TaskVis").attr("class", "el-button el-button--default");
             $("#TaskVis").removeAttr("disabled");//启用外呼
             $("#TaskAgentVis").attr("class", "el-button el-button--default");
@@ -629,6 +632,24 @@ function ButtonVisForStatus(Status) {
             break;
         case "会议状态":
             $("#StatusInput").val('会议状态');
+            break;
+        case "保持状态":
+            $("#StatusInput").val('保持状态');
+
+            $("#TaskVis").attr("class", "el-button el-button--default  is-disabled");
+            $("#TaskVis").attr("disabled", "disabled");
+            $("#TaskAgentVis").attr("class", "el-button el-button--default  is-disabled");
+            $("#TaskAgentVis").attr("disabled", "disabled");
+            $("#TransferPoneVis").attr("disabled","disabled");
+            $("#TransferPoneVis").attr("class", "el-button el-button--default is-disabled");
+            $("#zxAniVis").attr("disabled","disabled");//咨询外线按钮
+            $("#zxAniVis").attr("class", "el-button el-button--default is-disabled");
+            $("#zxAgentVis").attr("disabled","disabled");//咨询坐席按钮
+            $("#zxAgentVis").attr("class", "el-button el-button--default is-disabled");
+            $("#AfterOperationVis").attr("disabled","disabled");
+            $("#AfterOperationVis").attr("class", "el-button el-button--default is-disabled");
+            $("#SatisfactionVis").attr("disabled","disabled");//禁用满意度按钮
+            $("#SatisfactionVis").attr("class", "el-button el-button--default is-disabled");
             break;
         default:
             break;

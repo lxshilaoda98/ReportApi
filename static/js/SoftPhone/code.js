@@ -80,12 +80,14 @@ $(document).ready(function () {
                 if(eventName["success"]=="true"){
                     $("#HoldVis").hide(); //隐藏保持按钮
                     $("#UnHoldVis").show();
+                    ButtonVisForStatus("保持状态");
                 }
                 break;
             case "UnHoldCall":
                 if(eventName["success"]=="true"){
                     $("#UnHoldVis").hide(); //隐藏取消保持按钮
                     $("#HoldVis").show();
+                    ButtonVisForStatus("服务状态")
                 }
                 break;
             case "CallHangup":
