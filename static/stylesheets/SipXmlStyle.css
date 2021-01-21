@@ -1,0 +1,128 @@
+.butclass_mod {
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    border: none;
+    color: black;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 5px;
+    font-family: 'MicrosoftYaHei';
+    font-weight: bold;
+    outline: none;
+}
+
+.butClose_mod {
+    padding: 5px 10px;
+    background-color: #DCDCDC;
+    border: none;
+    color: black;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 5px;
+    font-family: 'MicrosoftYaHei';
+    font-weight: bold;
+    outline: none;
+}
+
+.pushed1:hover,.pushed2:hover,.pushed3:hover,.pushed4:hover,.pushed5:hover,.pushed6:hover,.pushed7:hover
+,.pushed8:hover,.pushed9:hover,.pushed0:hover,.pushedasterisk:hover,.pushednumber:hover{ background-color: #99BBE8; }
+
+
+.inpclass_mod {
+    outline: none;
+    border-radius: 7px;
+}
+
+.screen {
+    position: absolute;
+    width: 211px;
+    background: white;
+    left: 50%;
+    top: 50%;
+    margin: -50px 0 0 -50px;
+    border: 1px solid #696969;
+
+}
+
+.numbers-container span {
+    width: 40px;
+    height: 40px;
+    float: left;
+    font-size: 0;
+    margin: 0 30px 8px 0;
+    border-radius: 25%;
+    position: relative;
+
+    cursor: pointer;
+    background: url(../images/ph_r10_c18.png) 0 0 no-repeat;
+}
+
+.numbers-container {
+    overflow: hidden;
+    margin: 5px auto;
+
+}
+
+.numbers-container .pushed1 {
+    background-position: 8px 4px;
+    margin-left: 16px;
+}
+
+.numbers-container .pushed2 {
+    background-position: -53px 2px;
+}
+
+.numbers-container .pushed3 {
+    background-position: -116px 2px;
+    margin-right: 0;
+}
+
+.numbers-container .pushed4 {
+    margin-left: 16px;
+    background-position: 8px -44px;
+}
+
+.numbers-container .pushed5 {
+    background-position: -53px -44px;
+}
+
+.numbers-container .pushed6 {
+    background-position: -116px -44px;
+    margin-right: 0;
+}
+
+.numbers-container .pushed7 {
+    margin-left: 16px;
+    background-position: 8px -90px;
+}
+
+.numbers-container .pushed8 {
+    background-position: -53px -89px;
+}
+
+.numbers-container .pushed9 {
+    background-position: -116px -90px;
+    margin-right: 0;
+}
+
+.numbers-container .pushedasterisk {
+    margin-left: 16px;
+    background-position: 8px -127px;
+}
+
+.numbers-container .pushed0 {
+    background-position: -53px -127px;
+}
+
+.numbers-container .pushednumber {
+    background-position: -116px -127px;
+    margin-right: 0;
+}
+
+
