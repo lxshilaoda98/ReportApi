@@ -44,6 +44,18 @@ func Cors() gin.HandlerFunc {
 //	title string
 //	typeL string
 //}
+//保存ivr返回的模块json
+func IvrSave(c *gin.Context) {
+	id := c.Request.FormValue("id")
+	sJson := c.Request.FormValue("sJson")
+	fmt.Println(id, sJson)
+	m := models.IvrModel{}
+	m.ResJson(id, sJson)
+	c.JSON(http.StatusOK, gin.H{
+		"code": 20000,
+		"msg":  "成功",
+	})
+}
 
 //文件相关
 func FileUpload(c *gin.Context) {

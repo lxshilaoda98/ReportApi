@@ -8,6 +8,7 @@ import (
 func main() {
 	defer db.SqlDB.Close()
 	router := InitRouter()
+	//开始esl 事件
 	//go EslHelper.ConnectionEsl()
 	//for i:=0;i<10;i++ {
 	//	//开启10个进程添加测试数据。。。

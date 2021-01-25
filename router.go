@@ -40,6 +40,7 @@ func InitRouter() *gin.Engine {
 	//
 	//router.POST("/person", AddPersonApi)
 
+	router.POST("/IvrSave", IvrSave)
 	/**
 	fs相关处理
 	*/
