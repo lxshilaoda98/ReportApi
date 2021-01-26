@@ -9,6 +9,60 @@ import (
 	"time"
 )
 
+//["周一","周三"]转换成 周一,周三
+func TranWeekSplic(weekString []string) (newCheck string, err error) {
+	checkStr := ""
+	for _, v := range weekString {
+		checkStr += v + ","
+	}
+	if len(checkStr) > 0 {
+		newCheck = strings.TrimRight(checkStr, ",")
+	}
+	return
+}
+
+//关于VUE时间的处理
+//格式为：2016-10-10T00:00:00.000Z
+//返回 时分秒 00:00:00
+func TranVueTime(Times string) (s string, err error) {
+	spStr := strings.Split(Times, "T")
+	ssStr := strings.Split(spStr[1], ".")
+	newTime := spStr[0] + " " + ssStr[0]
+	local1, err := time.ParseInLocation("2006-01-02 15:04:05", newTime, time.Local)
+	if err != nil {
+		fmt.Println("time Parse Err >>>", err)
+		return
+	}
+	h, err := time.ParseDuration("1h")
+	if err != nil {
+		fmt.Println("time ParseDuration Err >>>", err)
+		return
+	}
+	s = local1.Add(8 * h).Format("15:04:05")
+	return
+}
+
+//关于VUE时间的处理
+//格式为：2016-10-10T00:00:00.000Z
+//返回 年月日 时分秒2006-01-02 00:00:00
+func TranVueTimeForYY(Times string) (s string, err error) {
+	spStr := strings.Split(Times, "T")
+	ssStr := strings.Split(spStr[1], ".")
+	newTime := spStr[0] + " " + ssStr[0]
+	local1, err := time.ParseInLocation("2006-01-02 15:04:05", newTime, time.Local)
+	if err != nil {
+		fmt.Println("time Parse Err >>>", err)
+		return
+	}
+	h, err := time.ParseDuration("24h")
+	if err != nil {
+		fmt.Println("time ParseDuration Err >>>", err)
+		return
+	}
+	s = local1.Add(h).Format("2006-01-02")
+	return
+}
+
 func InsterGateway(Number int) {
 	name := ""
 	for i := 0; i <= Number; i++ {

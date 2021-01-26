@@ -41,6 +41,8 @@ func InitRouter() *gin.Engine {
 	//router.POST("/person", AddPersonApi)
 
 	router.POST("/IvrSave", IvrSave)
+
+	router.POST("/IvrSaveForType", IvrSaveForType)
 	/**
 	fs相关处理
 	*/

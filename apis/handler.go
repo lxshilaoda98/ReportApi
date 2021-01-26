@@ -48,13 +48,66 @@ func Cors() gin.HandlerFunc {
 func IvrSave(c *gin.Context) {
 	id := c.Request.FormValue("id")
 	sJson := c.Request.FormValue("sJson")
-	fmt.Println(id, sJson)
+	//fmt.Println(id, sJson)
+	fmt.Println("step 1 Start")
 	m := models.IvrModel{}
-	m.ResJson(id, sJson)
+	err := m.ResJson(id, sJson)
+	if err != nil {
+		fmt.Println("step 1 Err ..", err)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"msg":  "错误:",
+		})
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"msg":  "成功",
+		})
+	}
+	fmt.Println("step 1 end")
+}
+func IvrSaveForType(c *gin.Context) {
+	fmt.Println("ivrSaveForType  Start")
+	id := c.Request.FormValue("id")
+	sJson := c.Request.FormValue("sJson")
+	sType := c.Request.FormValue("type")
+	code := 20000
+	msg := "成功"
+	fmt.Println(id)
+	fmt.Println(sJson)
+	fmt.Println(sType)
+	switch sType {
+	case "offTime":
+		t := models.IvrType{}
+		err := t.ResViewsType(id, sJson)
+		if err != nil {
+			code = 50000
+			msg = "保存失败"
+		} else {
+			code = 20000
+			msg = "成功"
+		}
+	case "music":
+		t := models.MusicMode{}
+		err := t.ResViewsTypeForMusic(id, sJson)
+		if err != nil {
+			code = 50000
+			msg = "保存失败"
+		} else {
+			code = 20000
+			msg = "成功"
+		}
+	default:
+		fmt.Println(sType)
+		code = 50000
+		msg = "失败，未找到方法"
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"code": 20000,
-		"msg":  "成功",
+		"code": code,
+		"msg":  msg,
 	})
+
 }
 
 //文件相关
@@ -664,7 +717,7 @@ func GetCCUserAll(c *gin.Context) {
 	count := cc.GetCCUserCount()
 
 	if err != nil {
-		fmt.Printf("sql error .>>", err)
+		fmt.Printf("sql Error .>>", err)
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"code":   20000,
