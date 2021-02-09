@@ -40,9 +40,17 @@ func InitRouter() *gin.Engine {
 	//
 	//router.POST("/person", AddPersonApi)
 
+	//关于IVR 模块
+	router.GET("/GetIvrModel",GetIvrModel) //获取单模块的ivr流程的json串
+	router.POST("SenIvrModel",SenIvrModel)
 	router.POST("/IvrSave", IvrSave)
-
 	router.POST("/IvrSaveForType", IvrSaveForType)
+	router.GET("/GetViewsType",GetViewsType)
+	router.POST("/MusicSaveFile", MusicSaveFile)
+	router.DELETE("/MusicRmFile",MusicRmFile)
+
+
+
 	/**
 	fs相关处理
 	*/

@@ -19,8 +19,6 @@ func init() {
 	}else if DBDriver =="mysql"{
 		connString="root:root@tcp(127.0.0.1:3307)/freeswitch?parseTime=true"
 	}
-	fmt.Println(DBDriver,connString)
-
 	var err error
 	SqlDB, err = sql.Open(DBDriver, connString)
 	if err != nil {

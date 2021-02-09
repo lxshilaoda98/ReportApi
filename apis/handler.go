@@ -74,9 +74,9 @@ func IvrSaveForType(c *gin.Context) {
 	sType := c.Request.FormValue("type")
 	code := 20000
 	msg := "成功"
-	fmt.Println(id)
-	fmt.Println(sJson)
-	fmt.Println(sType)
+	//fmt.Println(id)
+	//fmt.Println(sJson)
+	//fmt.Println(sType)
 	switch sType {
 	case "offTime":
 		t := models.IvrType{}
@@ -98,6 +98,26 @@ func IvrSaveForType(c *gin.Context) {
 			code = 20000
 			msg = "成功"
 		}
+	case "agent":
+		t := models.AgentModel{}
+		err := t.ResViewsTypeForAgent(id, sJson)
+		if err != nil {
+			code = 50000
+			msg = "保存失败"
+		} else {
+			code = 20000
+			msg = "成功"
+		}
+	case "group":
+		t := models.GroupModel{}
+		err := t.ResViewsTypeForGroup(id, sJson)
+		if err != nil {
+			code = 50000
+			msg = "保存失败"
+		} else {
+			code = 20000
+			msg = "成功"
+		}
 	default:
 		fmt.Println(sType)
 		code = 50000
@@ -108,6 +128,145 @@ func IvrSaveForType(c *gin.Context) {
 		"msg":  msg,
 	})
 
+}
+func GetViewsType(c *gin.Context) {
+	id := c.Request.FormValue("id")
+	typeStr := c.Request.FormValue("type")
+	m := models.GetIvrType{}
+	switch typeStr {
+	case "offTime":
+		Gtype, err := m.OffTimeM(id, typeStr)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"code": 20000,
+				"msg":  "错误:",
+			})
+			return
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"code":     20000,
+				"msg":      "成功",
+				"nodeList": Gtype,
+			})
+		}
+	case "music":
+		MType, err := m.MusicM(id, typeStr)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"code": 20000,
+				"msg":  "错误:",
+			})
+			return
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"code":     20000,
+				"msg":      "成功",
+				"nodeList": MType,
+			})
+		}
+	case "agent":
+		AGType, err := m.AgentM(id, typeStr)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"code": 20000,
+				"msg":  "错误:",
+			})
+			return
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"code":     20000,
+				"msg":      "成功",
+				"nodeList": AGType,
+			})
+		}
+	case "group":
+		GPType, err := m.GroupM(id, typeStr)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"code": 20000,
+				"msg":  "错误:",
+			})
+			return
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"code":     20000,
+				"msg":      "成功",
+				"nodeList": GPType,
+			})
+		}
+	}
+
+}
+func MusicSaveFile(c *gin.Context) {
+	id := c.Request.FormValue("id")
+	sJson := c.Request.FormValue("sJson")
+	fid := c.Request.FormValue("fid")
+	m := models.InFileData{}
+	err := m.InsSuccess(id, sJson, fid)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"msg":  "错误:",
+		})
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"msg":  "成功",
+		})
+	}
+}
+func MusicRmFile(c *gin.Context) {
+	fid := c.Request.FormValue("fid")
+	m := models.InFileData{}
+	err := m.RmSuccess(fid)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  "错误:",
+		})
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"msg":  "成功",
+		})
+	}
+}
+//通过id 获取ivr的json数据
+func GetIvrModel(c *gin.Context) {
+	fid := c.Request.FormValue("fid")
+	m := models.IvrModel{}
+	JSonStr, err := m.GetJsonStr(fid)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 50000,
+			"msg":  "错误:",
+		})
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 20000,
+			"msg":  "成功",
+			"data": JSonStr,
+		})
+	}
+
+}
+//通过id 解析成lua文件，解析成ivr
+func SenIvrModel(c *gin.Context){
+	result := models.ResultClass{}
+	id:=c.Request.FormValue("id")
+	//写入流程，json解析
+	err:= models.JsonAsLua(id)
+	if err != nil {
+		result.Code = 50000
+		result.Msg = err.Error()
+	}else{
+		result.Code = 20000
+		result.Msg = "写入成功！"
+	}
+	c.JSON(http.StatusOK, result)
 }
 
 //文件相关

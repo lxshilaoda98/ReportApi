@@ -5,6 +5,7 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
+	helper "github.com/n1n1n1_owner/ReportApi/models/Helper"
 )
 
 type ResultClass struct {
@@ -13,9 +14,12 @@ type ResultClass struct {
 	Msg  string      `json:"msg"`
 }
 
+
 func (r *ResultClass) Up(file multipart.File, header *multipart.FileHeader) {
+	config:= helper.GetIVRConfig()
+	var FsDir = config.GetString("IVRConfig.dir")
 	filename := header.Filename
-	out, err := os.Create("./static/res/uploadFile/ivrWav/" + filename)
+	out, err := os.Create(FsDir+"/sounds/en/us/callie/IVRWav/" + filename)
 	if err == nil {
 		defer out.Close()
 		_, err = io.Copy(out, file)

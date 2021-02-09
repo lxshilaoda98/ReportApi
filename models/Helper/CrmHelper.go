@@ -2,12 +2,58 @@ package Helper
 
 import (
 	"fmt"
+	"github.com/fsnotify/fsnotify"
 	db "github.com/n1n1n1_owner/ReportApi/database"
+	"github.com/spf13/viper"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
 )
+//获取最大值
+func Max(vals...int) int {
+	var max int
+	for _, val := range vals {
+		if val > max {
+			max = val
+		}
+	}
+	return max
+}
+//获取最小值
+func Min(vals...int) int {
+	var min int
+
+	for _, val := range vals {
+
+		if  val <= min {
+
+			min = val
+		}
+	}
+	return min
+}
+
+//获取jsonConfig参数
+func GetIVRConfig()(config *viper.Viper) {
+	config = viper.New()
+	config.AddConfigPath("./")
+	config.SetConfigName("config")
+	config.SetConfigType("json")
+	if err := config.ReadInConfig(); err != nil {
+		panic(err)
+	}
+	config.WatchConfig()
+	config.OnConfigChange(func(e fsnotify.Event) {
+		fmt.Println("config file changed:", e.Name)
+		if err := config.ReadInConfig(); err != nil {
+			panic(err)
+		}
+	})
+
+	return
+}
 
 //["周一","周三"]转换成 周一,周三
 func TranWeekSplic(weekString []string) (newCheck string, err error) {
@@ -20,25 +66,57 @@ func TranWeekSplic(weekString []string) (newCheck string, err error) {
 	}
 	return
 }
+//["周一","周三"]转换成 0,1,2,3  周日=0
+func TranWeekNumber(sw string) (newCheck string, err error){
+	checkStr := ""
+	weekString :=strings.Split(sw,",")
+	var checkNumber string
+	for _, v := range weekString {
+		switch v {
+		case "周一":
+			checkNumber = "1"
+		case "周二":
+			checkNumber = "2"
+		case "周三":
+			checkNumber = "3"
+		case "周四":
+			checkNumber = "4"
+		case "周五":
+			checkNumber = "5"
+		case "周六":
+			checkNumber = "6"
+		case "周日":
+			checkNumber = "0"
+		}
+		checkStr += checkNumber + ","
+	}
+	if len(checkStr) > 0 {
+		newCheck = strings.TrimRight(checkStr, ",")
+	}
+	return
+}
 
 //关于VUE时间的处理
 //格式为：2016-10-10T00:00:00.000Z
 //返回 时分秒 00:00:00
 func TranVueTime(Times string) (s string, err error) {
 	spStr := strings.Split(Times, "T")
-	ssStr := strings.Split(spStr[1], ".")
-	newTime := spStr[0] + " " + ssStr[0]
-	local1, err := time.ParseInLocation("2006-01-02 15:04:05", newTime, time.Local)
-	if err != nil {
-		fmt.Println("time Parse Err >>>", err)
-		return
+	if len(spStr)==2{
+		ssStr := strings.Split(spStr[1], ".")
+		newTime := spStr[0] + " " + ssStr[0]
+		local1, err := time.ParseInLocation("2006-01-02 15:04:05", newTime, time.Local)
+		if err != nil {
+			fmt.Println("time Parse Err >>>", err)
+		}
+		h, err := time.ParseDuration("1h")
+		if err != nil {
+			fmt.Println("time ParseDuration Err >>>", err)
+		}
+		s = local1.Add(8 * h).Format("15:04:05")
+	}else{
+		lo,_:=time.Parse("2006-01-02 15:04:05",Times)
+		s =lo.Format("15:04:05")
 	}
-	h, err := time.ParseDuration("1h")
-	if err != nil {
-		fmt.Println("time ParseDuration Err >>>", err)
-		return
-	}
-	s = local1.Add(8 * h).Format("15:04:05")
 	return
 }
 
@@ -47,19 +125,22 @@ func TranVueTime(Times string) (s string, err error) {
 //返回 年月日 时分秒2006-01-02 00:00:00
 func TranVueTimeForYY(Times string) (s string, err error) {
 	spStr := strings.Split(Times, "T")
-	ssStr := strings.Split(spStr[1], ".")
-	newTime := spStr[0] + " " + ssStr[0]
-	local1, err := time.ParseInLocation("2006-01-02 15:04:05", newTime, time.Local)
-	if err != nil {
-		fmt.Println("time Parse Err >>>", err)
-		return
+	if len(spStr)==2{
+		ssStr := strings.Split(spStr[1], ".")
+		newTime := spStr[0] + " " + ssStr[0]
+		local1, err := time.ParseInLocation("2006-01-02 15:04:05", newTime, time.Local)
+		if err != nil {
+			fmt.Println("time Parse Err >>>", err)
+		}
+		h, err := time.ParseDuration("24h")
+		if err != nil {
+			fmt.Println("time ParseDuration Err >>>", err)
+		}
+		s = local1.Add(h).Format("2006-01-02")
+	}else{
+		lo,_:=time.Parse("2006-01-02",Times)
+		s =lo.Format("2006-01-02")
 	}
-	h, err := time.ParseDuration("24h")
-	if err != nil {
-		fmt.Println("time ParseDuration Err >>>", err)
-		return
-	}
-	s = local1.Add(h).Format("2006-01-02")
 	return
 }
 
@@ -132,7 +213,30 @@ func tranWeekday(week int) (weekName string) {
 	return
 }
 
-//判断dqtime时间是否在stime和etime之间
+//英文转中文周几//找到今天是周几
+func FyWeek(sWeek string)(weekStr string){
+	switch sWeek {
+	case "Monday":
+		weekStr="周一"
+	case "Tuesday":
+		weekStr="周二"
+	case "Wednesday":
+		weekStr="周三"
+	case "Thursday":
+		weekStr="周四"
+	case "Friday":
+		weekStr="周五"
+	case "Saturday":
+		weekStr="周六"
+	case "Sunday":
+		weekStr="周日"
+	default:
+		weekStr=sWeek
+	}
+	return
+}
+
+//判断dqtime时间是否在stime和etime之间 [检验所的，忽略]
 func tranTimeSub(dqTime, sTime, eTime string) bool {
 	dqNew, _ := strconv.Atoi(strings.Split(dqTime, ":")[0])
 	sbNew, _ := strconv.Atoi(strings.Split(sTime, ":")[0])
@@ -143,7 +247,7 @@ func tranTimeSub(dqTime, sTime, eTime string) bool {
 	return false
 }
 
-//根据号码查询归属地
+//根据号码查询归属地[检验所的，忽略]
 func GetGsdForAni(Ani string) (City string) {
 	fmt.Printf("要查询的电话号码为:%v \n", Ani)
 	aniLen := len(Ani)
@@ -167,7 +271,7 @@ func GetGsdForAni(Ani string) (City string) {
 	return
 }
 
-//查看上下班时间
+//查看上下班时间[检验所的，忽略]
 func GetZgssxbsjForCity(city string) (boNew bool) {
 	boNew = false
 	sql := "select Oid from WorkTimeSetting where title like '%" + city + "%'"
@@ -228,7 +332,6 @@ func GetZgssxbsjForCity(city string) (boNew bool) {
 }
 
 //根据传入的秒 返回对应的天，或者小时 或者分钟
-
 func ResolveTime(seconds int) (day int, hour int, minute int) {
 	var (
 		//定义每分钟的秒数

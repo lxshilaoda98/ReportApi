@@ -24,25 +24,33 @@ type NodeLists struct {
 	Ico   string
 	State string
 }
-
 type LineList struct {
 	From  string
 	To    string
 	Label string
 }
 
-//语音结构体
+//语音结构体begin
 type MusicMode struct {
-	Name     string
-	FileList []fileList
-	IsCheck  string
+	Oid         string
+	Title 		string
+	Min         string
+	Max         string
+	Timeout     string
+	Terminators string
+	KxCheck     []string
+	KxCheckStr  string
+	Name        string
+	FileList    []fileList
+	IsCheck     string
+	DataList    []resData
 }
 type fileList struct {
 	Status     string
 	Name       string
 	Size       int64
 	Percentage int64
-	Uid        int64
+	Uid        string
 	Raw        raw
 	Response   response
 }
@@ -58,6 +66,34 @@ type data struct {
 	FileName string
 	FilePath string
 }
+type resData struct {
+	Name string `json:"name"`
+	Url  string `json:"url"`
+	Uid  string `json:"uid"`
+}
+type InFileData struct {
+	FileName string
+	FilePath string
+}
+
+//语音结构体end
+
+//人员信息结构体
+type AgentModel struct {
+	IsCheck string `json:"isCheck"`
+	Name    string `json:"name"`
+	Err     string `json:"err"`
+}
+
+//技能组信息结构体
+type GroupModel struct {
+	Name string `json:"name"`
+}
+
+type GetIvrType struct {
+	Id   string
+	Type string
+}
 
 type IvrType struct {
 	Oid           string
@@ -67,7 +103,7 @@ type IvrType struct {
 	Time4         []string
 	Time5         []string
 }
-type workTime struct {
+type WorkTime struct {
 	Sktime        string
 	Setime        string
 	Xktime        string
@@ -75,6 +111,14 @@ type workTime struct {
 	Sweek         string
 	Tdworktime    string
 	Tdoffworktime string
+}
+
+func (i *IvrModel) GetJsonStr(Oid string) (JsonStr string, err error) {
+	fmt.Println("Oid===>", Oid)
+	row := db.SqlDB.QueryRow("select JsonStr from ivr_com where foid =?", Oid)
+	row.Scan(&JsonStr)
+	fmt.Println(JsonStr)
+	return
 }
 
 func (i *IvrModel) ResJson(Oid, jsonStr string) (err error) {
@@ -161,13 +205,15 @@ func (i *IvrModel) ResJson(Oid, jsonStr string) (err error) {
 
 }
 
+//工作时间
 func (i *IvrType) ResViewsType(id, JsonStr string) (err error) {
-	wt := workTime{}
+	wt := WorkTime{}
 	fmt.Printf("id..>%s ,viewsTypeJson.>>%s \n", id, JsonStr)
 	b := []byte(JsonStr)
 	if err := json.Unmarshal(b, &i); err != nil {
 		fmt.Println("err json..>", err)
 	} else {
+
 		sktime, err := helper.TranVueTime(i.TimeStart[0])
 		if err != nil {
 			fmt.Println("【sktime】err..>", err)
@@ -230,52 +276,8 @@ func (i *IvrType) ResViewsType(id, JsonStr string) (err error) {
 	return
 }
 
-func (m *MusicMode) ResViewsTypeForMusic(id, JsonStr string) (err error) {
-	fmt.Printf("id..>%s . views TypeJson.>>%s \n", id, JsonStr)
-	b := []byte(JsonStr)
-	if err := json.Unmarshal(b, &m); err != nil {
-		fmt.Println("json Err..>", err)
-	}
-	err = insertFile(id, m)
-
-	return
-}
-func insertFile(id string, m *MusicMode) (err error) {
-	_, err = db.SqlDB.Exec("delete from ivr_viewstype where viewsOid = ?", id)
-	if err != nil {
-		fmt.Println("delete ivr_viewstype Err..>", err)
-	} else {
-		_, err = db.SqlDB.Exec("insert into ivr_viewstype (viewsOid,bf_relNumber,bf_interrupt)values(?,?,?)", id, m.Name, m.IsCheck)
-		if err != nil {
-			fmt.Println("insert ivr_viewstype Err..>", err)
-		} else {
-			_, err = db.SqlDB.Exec("delete from ivr_viewsfile where viewsOid =?", id)
-			if err != nil {
-				fmt.Println("clear ivr_viewFile Err..>", err)
-			} else {
-				fmt.Println("clear ivr_viewFile Success ")
-				for _, v := range m.FileList {
-					//if v.Status == "success" {
-					//添加数据到数据库
-					fmt.Println("insert ivr_viewFile begin")
-					_, err = db.SqlDB.Exec("insert into ivr_viewsfile(fileName,filePath,viewsOid)values(?,?,?)", v.Response.Data.FileName, v.Response.Data.FilePath, id)
-					if err != nil {
-						fmt.Println("insert ivr_viewFile Err..>", err)
-					} else {
-						fmt.Println("insert ivr_viewFile Success.")
-					}
-					//} else {
-					//	fmt.Println("Response Err.>", v.Status)
-					//}
-				}
-			}
-		}
-	}
-	return
-}
-
 //插入关于工作时间的属性
-func insertWt(id string, wt workTime) (count int64, err error) {
+func insertWt(id string, wt WorkTime) (count int64, err error) {
 	result, err := json.Marshal(wt)
 	if err != nil {
 		fmt.Println("toMarshal err..>", err)
@@ -300,5 +302,179 @@ func insertWt(id string, wt workTime) (count int64, err error) {
 		}
 	}
 
+	return
+}
+
+//语音模块
+func (m *MusicMode) ResViewsTypeForMusic(id, JsonStr string) (err error) {
+	fmt.Printf("id..>%s . views TypeJson.>>%s \n", id, JsonStr)
+	b := []byte(JsonStr)
+	if err := json.Unmarshal(b, &m); err != nil {
+		fmt.Println("json Err..>", err)
+	}
+	err = insertFile(id, m)
+
+	return
+}
+func insertFile(id string, m *MusicMode) (err error) {
+	_, err = db.SqlDB.Exec("delete from ivr_viewstype where viewsOid = ?", id)
+	if err != nil {
+		fmt.Println("delete ivr_viewstype Err..>", err)
+	} else {
+		fmt.Println("ll...>",m.KxCheck)
+		var cs =""
+
+		for _,v:=range m.KxCheck {
+			cs += v + ","
+		}
+		var kxChen=""
+		if len(cs) > 0 {
+			kxChen =strings.TrimRight(cs, ",")
+		}
+		_, err = db.SqlDB.Exec("insert into ivr_viewstype (title,`type`,viewsOid,bf_relNumber,bf_interrupt,bf_Min,bf_Max,bf_Timeout,bf_Terminators,bf_kxCheck)values(?,?,?,?,?,?,?,?,?,?)", m.Title,"music", id, m.Name, m.IsCheck,m.Min,m.Max,m.Timeout,m.Terminators,kxChen)
+		if err != nil {
+			fmt.Println("insert ivr_viewstype Err..>", err)
+		}
+	}
+	return
+}
+
+//语音添加成功后方法
+func (i *InFileData) InsSuccess(id, JsonStr, fid string) (err error) {
+	b := []byte(JsonStr)
+	if err := json.Unmarshal(b, &i); err != nil {
+		fmt.Println("json Err..>", err)
+	}
+	_, err = db.SqlDB.Exec("insert into ivr_viewsfile(fileName,filePath,viewsOid,fileOid)values(?,?,?,?)", i.FileName, i.FilePath, id, fid)
+	if err != nil {
+		fmt.Println("insert ivr_viewFile Err..>", err)
+	} else {
+		fmt.Println("insert ivr_viewFile Success.")
+	}
+	return
+}
+
+//语音删除后方法
+func (i *InFileData) RmSuccess(fid string) (err error) {
+	_, err = db.SqlDB.Exec("delete from ivr_viewsfile where fileOid =?", fid)
+	if err != nil {
+		fmt.Println("clear ivr_viewFile Err..>", err)
+	} else {
+		fmt.Println("clear ivr_viewFile Success ")
+	}
+	return
+}
+
+//坐席模块
+func (a *AgentModel) ResViewsTypeForAgent(id, JsonStr string) (err error) {
+	fmt.Printf("id..>%s . views TypeJson.>>%s \n", id, JsonStr)
+	b := []byte(JsonStr)
+	if err := json.Unmarshal(b, &a); err != nil {
+		fmt.Println("json Err..>", err)
+	}
+	err = insertAgent(id, a)
+	return
+}
+func insertAgent(id string, a *AgentModel) (err error) {
+	//直接插入库数据
+	_, err = db.SqlDB.Exec("delete from ivr_viewstype where viewsOid = ?", id)
+	if err != nil {
+		fmt.Println("delete ivr_viewstype Err..>", err)
+	} else {
+		_, err = db.SqlDB.Exec("insert into ivr_viewstype (`type`,viewsOid,ag_interrupt,ag_name,ag_errTran)values(?,?,?,?,?)", "agent", id, a.IsCheck, a.Name, a.Err)
+		if err != nil {
+			fmt.Println("insert ivr_viewstype Err..>", err)
+		}
+	}
+	return
+}
+
+//技能组模块
+func (g *GroupModel) ResViewsTypeForGroup(id, JsonStr string) (err error) {
+	fmt.Printf("id..>%s . views TypeJson.>>%s \n", id, JsonStr)
+	b := []byte(JsonStr)
+	if err := json.Unmarshal(b, &g); err != nil {
+		fmt.Println("json Err..>", err)
+	}
+	err = insertGroup(id, g)
+	return
+}
+func insertGroup(id string, g *GroupModel) (err error) {
+	//直接插入库数据
+	_, err = db.SqlDB.Exec("delete from ivr_viewstype where viewsOid = ?", id)
+	if err != nil {
+		fmt.Println("delete ivr_viewstype Err..>", err)
+	} else {
+		_, err = db.SqlDB.Exec("insert into ivr_viewstype (`type`,viewsOid,gp_name)values(?,?,?)", "group", id, g.Name)
+		if err != nil {
+			fmt.Println("insert ivr_viewstype Err..>", err)
+		}
+	}
+	return
+}
+
+//查询模块属性信息
+//上下班时间属性
+func (g *GetIvrType) OffTimeM(id, types string) (ivrType IvrType, err error) {
+	rows := db.SqlDB.QueryRow("select Oid,Sktime,Setime,Xktime,Xetime,Sweek,Tdworktime,Tdoffworktime from ivr_viewstype where viewsOid = ? and `type` = ?", id, types)
+	if err != nil {
+		fmt.Println("select ivr_viewsType Err..>", err)
+	} else {
+		typeN := WorkTime{}
+		rows.Scan(&ivrType.Oid,&typeN.Sktime, &typeN.Setime, &typeN.Xktime, &typeN.Xetime, &typeN.Sweek, &typeN.Tdworktime, &typeN.Tdoffworktime)
+		ivrType.TimeStart = append(ivrType.TimeStart, "2016-10-10 "+typeN.Sktime, "2016-10-10 "+typeN.Setime)
+		ivrType.TimeEnd = append(ivrType.TimeEnd, "2016-10-10 "+typeN.Xktime, "2016-10-10 "+typeN.Xetime)
+		strs := strings.Split(typeN.Sweek, ",")
+		for _, v := range strs {
+			ivrType.CheckedCities = append(ivrType.CheckedCities, v)
+		}
+		t4 := strings.Split(typeN.Tdworktime, ",")
+		for _, v := range t4 {
+			ivrType.Time4 = append(ivrType.Time4, v)
+		}
+		t5 := strings.Split(typeN.Tdoffworktime, ",")
+		for _, v := range t5 {
+			ivrType.Time5 = append(ivrType.Time5, v)
+		}
+		fmt.Println(ivrType.Time4)
+	}
+	return
+}
+
+//播放音乐属性
+func (g *GetIvrType) MusicM(id, types string) (musicMode MusicMode, err error) {
+	datas := make([]resData, 0)
+	data := resData{}
+	row := db.SqlDB.QueryRow("select Oid,Title,bf_relNumber,bf_interrupt,bf_Min,bf_Max,bf_Timeout,bf_Terminators,bf_KxCheck from ivr_viewsType where type = ? and viewsOid=?", types, id)
+fmt.Println("select Title,bf_relNumber,bf_interrupt,bf_Min,bf_Max,bf_Timeout,bf_Terminators,bf_KxCheck from ivr_viewsType where type = ? and viewsOid=?", types, id)
+	row.Scan(&musicMode.Oid,&musicMode.Title,&musicMode.Name, &musicMode.IsCheck,&musicMode.Min,&musicMode.Max,&musicMode.Timeout,&musicMode.Terminators,&musicMode.KxCheckStr)
+	rows, err := db.SqlDB.Query("select fileName,filePath,fileOid from ivr_viewsfile where viewsOid = ?", id)
+	for rows.Next() {
+		rows.Scan(&data.Name, &data.Url, &data.Uid)
+		datas = append(datas, data)
+	}
+	if len(musicMode.KxCheckStr) > 0 {
+		fs := strings.Split(musicMode.KxCheckStr,",")
+		for _,v:=range fs  {
+			musicMode.KxCheck = append(musicMode.KxCheck, v)
+		}
+	}
+	fmt.Println(musicMode.KxCheck)
+	musicMode.DataList = datas
+	return
+}
+
+//坐席属性
+func (g *GetIvrType) AgentM(id, types string) (agnetModel AgentModel, err error) {
+	row := db.SqlDB.QueryRow("select ag_interrupt,ag_name,ag_errTran from ivr_viewsType where type = ? and viewsOid=?", types, id)
+
+	row.Scan(&agnetModel.IsCheck, &agnetModel.Name, &agnetModel.Err)
+	return
+}
+
+//技能组属性
+func (g *GetIvrType) GroupM(id, types string) (groupModel GroupModel, err error) {
+	row := db.SqlDB.QueryRow("select gp_name from ivr_viewsType where type = ? and viewsOid=?", types, id)
+	row.Scan(&groupModel.Name)
 	return
 }
