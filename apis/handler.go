@@ -28,6 +28,7 @@ func Cors() gin.HandlerFunc {
 		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type")
 		c.Header("Access-Control-Allow-Credentials", "true")
 
+		fmt.Println("fangfa ..." + method)
 		//放行所有OPTIONS方法
 		if method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusNoContent)
@@ -233,6 +234,7 @@ func MusicRmFile(c *gin.Context) {
 		})
 	}
 }
+
 //通过id 获取ivr的json数据
 func GetIvrModel(c *gin.Context) {
 	fid := c.Request.FormValue("fid")
@@ -253,16 +255,17 @@ func GetIvrModel(c *gin.Context) {
 	}
 
 }
+
 //通过id 解析成lua文件，解析成ivr
-func SenIvrModel(c *gin.Context){
+func SenIvrModel(c *gin.Context) {
 	result := models.ResultClass{}
-	id:=c.Request.FormValue("id")
+	id := c.Request.FormValue("id")
 	//写入流程，json解析
-	err:= models.JsonAsLua(id)
+	err := models.JsonAsLua(id)
 	if err != nil {
 		result.Code = 50000
 		result.Msg = err.Error()
-	}else{
+	} else {
 		result.Code = 20000
 		result.Msg = "写入成功！"
 	}

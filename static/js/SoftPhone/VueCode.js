@@ -7,7 +7,6 @@ const vue =new Vue({
             dialogFormTransfer: false, //盲转dialog
             TransferAni: '',//盲转相关
             StateValue: false,
-
             zxAniText: '',//咨询相关
             zxDialog: false,
             zxAgentDialog: false, //咨询坐席
@@ -107,10 +106,17 @@ const vue =new Vue({
         },
         //外呼号码
         MakeCallAni() {
+            console.log("状态为："+this.StateValue)
             CallDirection = "out"; //设置为外呼的情况
+            var sv = "On Break";
+            if (this.StateValue==true){
+                sv="Available";
+                this.StateValue=false;
+            }
             var SendJson = {
                 MSG: "MakeCall",
                 Data: {
+                    "agentStatus":sv,
                     "extension": extension,
                     "CalledNumber": this.form.name,
                 }
@@ -123,6 +129,11 @@ const vue =new Vue({
         },
         //开始要外呼到坐席,给socket发送要外呼的信息
         TranAgentClick() {
+            var sv = "On Break";
+            if (this.StateValue==true){
+                sv="Available";
+                this.StateValue=false;
+            }
             if (this.gridClickOid == "") {
                 alert("请选择要转给的坐席!")
                 return
@@ -130,6 +141,7 @@ const vue =new Vue({
             var SendJson = {
                 MSG: "MakeCallAgent",
                 Data: {
+                    "agentStatus":sv,
                     "extension": extension,
                     "CalledNumber": this.gridClickOid,
                 }

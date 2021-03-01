@@ -3,7 +3,7 @@ var extension;//分机号
 var CallId;//主叫id
 var CalledId;//被叫id
 var HttpUrl="http://127.0.0.1:3333"; //访问http接口使用的地址
-var socketUrl = "ws://localhost:4444"; //一般情况ws 的地址就是http接口的地址
+var socketUrl = "ws://127.0.0.1:4444"; //一般情况ws 的地址就是http接口的地址
 var CallDirection;//呼叫方向，用来判断主叫和被叫
 var zxCallId;
 var zxCalledId;
